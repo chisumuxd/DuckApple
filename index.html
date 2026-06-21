@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+      font-family: "Arial", "Tahoma", sans-serif;
+    }
+
+    :root {
+      --duck-yellow: #ffd84d;
+      --duck-yellow-2: #ffe98f;
+      --duck-yellow-3: #fff8d8;
+      --duck-orange: #f59e0b;
+      --duck-brown: #7a4f00;
+      --duck-text: #3f3f46;
+      --duck-muted: #8a6a18;
+      --duck-border: #f5d66b;
+      --duck-white: #fffef8;
+      --success-bg: #ecfccb;
+      --success-border: #bef264;
+      --success-text: #3f6212;
+      --error-bg: #fff1f2;
+      --error-border: #fda4af;
+      --error-text: #9f1239;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 24px;
+      color: var(--duck-text);
+      background:
+        radial-gradient(circle at 8% 12%, rgba(255, 255, 255, 0.85) 0 0.7rem, transparent 0.75rem),
+        radial-gradient(circle at 82% 10%, rgba(255, 255, 255, 0.65) 0 1rem, transparent 1.08rem),
+        radial-gradient(circle at 16% 78%, rgba(255, 255, 255, 0.48) 0 1.2rem, transparent 1.3rem),
+        radial-gradient(circle at 91% 82%, rgba(255, 255, 255, 0.58) 0 0.85rem, transparent 0.95rem),
+        linear-gradient(135deg, #fff8c2 0%, #ffe884 30%, #ffd84d 62%, #ffc928 100%);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 980px;
+      background: rgba(255, 254, 248, 0.96);
+      border-radius: 32px;
+      padding: 30px;
+      box-shadow: 0 22px 60px rgba(122, 79, 0, 0.18);
+      border: 2px solid rgba(255, 237, 145, 0.95);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 10px;
+      background: linear-gradient(90deg, #ffdd57, #fff2a8, #ffb703, #fff2a8, #ffdd57);
+    }
+
+    .duck-hero {
+      text-align: center;
+      margin-top: 6px;
+      margin-bottom: 8px;
+    }
+
+    .duck-face {
+      width: 86px;
+      height: 86px;
+      margin: 0 auto 10px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ffe45e, #ffc928);
+      border: 3px solid #f7c948;
+      box-shadow: 0 14px 25px rgba(245, 158, 11, 0.22);
+      position: relative;
+    }
+
+    .duck-face::before,
+    .duck-face::after {
+      content: "";
+      position: absolute;
+      top: 28px;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #4b2e00;
+    }
+
+    .duck-face::before {
+      left: 24px;
+    }
+
+    .duck-face::after {
+      right: 24px;
+    }
+
+    .duck-bill {
+      position: absolute;
+      left: 50%;
+      top: 46px;
+      transform: translateX(-50%);
+      width: 34px;
+      height: 18px;
+      border-radius: 12px 12px 14px 14px;
+      background: #fb923c;
+      border: 2px solid #ea580c;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.25;
+      text-align: center;
+      color: var(--duck-brown);
+      font-weight: 900;
+      letter-spacing: -0.3px;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 22px;
+      color: var(--duck-brown);
+      font-weight: 900;
+    }
+
+    .sub {
+      text-align: center;
+      color: var(--duck-muted);
+      margin-bottom: 18px;
+      font-size: 14px;
+      line-height: 1.65;
+      font-weight: 600;
+    }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .account-box,
+    .remaining-box {
+      padding: 14px 16px;
+      border-radius: 20px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 800;
+      word-break: break-word;
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.55;
+    }
+
+    .account-box {
+      background: #fff7d1;
+      border: 2px solid #ffd666;
+      color: #8a5a00;
+    }
+
+    .account-box.error {
+      background: var(--error-bg);
+      border-color: var(--error-border);
+      color: var(--error-text);
+    }
+
+    .account-box.loading {
+      background: #fff9e6;
+      border-color: #fcd34d;
+      color: #a16207;
+    }
+
+    .remaining-box {
+      background: #fff2a8;
+      border: 2px solid #facc15;
+      color: #854d0e;
+    }
+
+    .remaining-box.empty {
+      background: var(--error-bg);
+      border-color: var(--error-border);
+      color: var(--error-text);
+    }
+
+    .remaining-box.loading {
+      background: #fff9e6;
+      border-color: #fde68a;
+      color: #a16207;
+    }
+
+    .main-panel,
+    .admin-panel,
+    .admin-section,
+    .report-box {
+      margin-top: 18px;
+      padding: 20px;
+      border-radius: 24px;
+      border: 2px solid #ffe08a;
+      background: rgba(255, 253, 242, 0.92);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.85);
+    }
+
+    .admin-section {
+      margin-top: 18px;
+    }
+
+    .admin-divider {
+      margin: 22px 0;
+      border: none;
+      border-top: 2px dashed #f4d26b;
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 7px;
+      font-weight: 900;
+      font-size: 14px;
+      color: var(--duck-brown);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 13px 14px;
+      border: 2px solid #ffe08a;
+      border-radius: 16px;
+      font-size: 15px;
+      outline: none;
+      background: var(--duck-white);
+      color: #44403c;
+      transition: 0.16s ease;
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #facc15;
+      box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.18);
+      background: #ffffff;
+    }
+
+    .type-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+    }
+
+    .type-option {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 0;
+      padding: 14px 12px;
+      border: 2px solid #ffe08a;
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 900;
+      background: #fffef8;
+      color: var(--duck-brown);
+      user-select: none;
+      font-size: 15px;
+      transition: 0.18s ease;
+    }
+
+    .type-option:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(250, 204, 21, 0.16);
+    }
+
+    .type-option input {
+      display: none;
+    }
+
+    .type-option.active {
+      background: linear-gradient(135deg, #ffe066, #ffd43b);
+      border-color: #facc15;
+      color: #6b4f00;
+      box-shadow: 0 10px 18px rgba(250, 204, 21, 0.20);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 17px;
+      background: linear-gradient(135deg, #ffd43b, #facc15);
+      color: #6b4f00;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(250, 204, 21, 0.20);
+      transition: 0.18s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.01);
+    }
+
+    button:disabled {
+      background: #e5e7eb;
+      color: #6b7280;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .secondary-btn {
+      background: #fff8dc;
+      color: var(--duck-brown);
+      border: 2px solid #ffe08a;
+      box-shadow: none;
+    }
+
+    .history-btn {
+      background: linear-gradient(135deg, #fde68a, #fcd34d);
+      color: #6b4f00;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .admin-btn {
+      background: linear-gradient(135deg, #ffe066, #facc15);
+      color: #6b4f00;
+    }
+
+    .warning-btn {
+      background: linear-gradient(135deg, #fdba74, #fb923c);
+      color: #7c2d12;
+    }
+
+    .small-btn {
+      width: auto;
+      margin-top: 0;
+      padding: 8px 12px;
+      border-radius: 13px;
+      font-size: 13px;
+      box-shadow: none;
+    }
+
+    .block-btn {
+      background: #fecaca;
+      color: #991b1b;
+    }
+
+    .active-btn {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .edit-btn {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .grid-2,
+    .report-actions,
+    .summary-filter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .result {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      display: none;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.65;
+      font-weight: 700;
+    }
+
+    .success {
+      display: block;
+      background: var(--success-bg);
+      border: 2px solid var(--success-border);
+      color: var(--success-text);
+    }
+
+    .error {
+      display: block;
+      background: var(--error-bg);
+      border: 2px solid var(--error-border);
+      color: var(--error-text);
+    }
+
+    .note {
+      margin-top: 18px;
+      font-size: 12px;
+      color: var(--duck-muted);
+      text-align: center;
+      line-height: 1.6;
+      font-weight: 700;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .user-list {
+      margin-top: 16px;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .user-item,
+    .history-item {
+      border: 1px solid #f5df97;
+      border-radius: 18px;
+      padding: 13px;
+      margin-bottom: 10px;
+      background: #fffef8;
+    }
+
+    .user-email,
+    .history-name {
+      font-weight: 900;
+      word-break: break-all;
+      margin-bottom: 5px;
+      color: var(--duck-brown);
+    }
+
+    .user-meta,
+    .history-time {
+      color: #7c7c7c;
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      margin-right: 5px;
+      margin-top: 5px;
+    }
+
+    .badge-active {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-blocked {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-admin {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-user {
+      background: #fffbeb;
+      color: #a16207;
+    }
+
+    .user-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(90, 67, 0, 0.35);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 18px;
+      z-index: 9999;
+      backdrop-filter: blur(3px);
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 660px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #fffdf7;
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 25px 70px rgba(122, 92, 0, 0.25);
+      border: 2px solid #ffe08a;
+      animation: pop 0.18s ease-out;
+    }
+
+    @keyframes pop {
+      from {
+        transform: scale(0.94);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      text-align: center;
+      color: var(--duck-brown);
+    }
+
+    .modal-sub {
+      text-align: center;
+      color: var(--duck-muted);
+      font-size: 14px;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+
+    .code-box,
+    .history-codes {
+      background: #fff8d6;
+      color: #6b4f00;
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px dashed #facc15;
+      font-family: monospace;
+      font-size: 15px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .modal-actions.single {
+      grid-template-columns: 1fr;
+    }
+
+    .copy-btn {
+      margin-top: 0;
+      background: #fde68a;
+      color: #6b4f00;
+    }
+
+    .close-btn {
+      margin-top: 0;
+      background: #fff8dc;
+      color: var(--duck-brown);
+      border: 2px solid #ffe08a;
+      box-shadow: none;
+    }
+
+    .remain {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--duck-muted);
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .history-list {
+      max-height: 460px;
+      overflow-y: auto;
+      margin-top: 14px;
+    }
+
+    .report-section {
+      margin-top: 18px;
+    }
+
+    .report-title {
+      font-weight: 900;
+      margin-bottom: 8px;
+      color: var(--duck-brown);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .summary-card {
+      background: linear-gradient(145deg, #fff9d9, #fff3aa);
+      border: 2px solid #f5d66b;
+      border-radius: 20px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .summary-card-label {
+      color: var(--duck-muted);
+      font-size: 13px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .summary-card-value {
+      color: var(--duck-brown);
+      font-size: 26px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .report-table-wrap {
+      overflow-x: auto;
+      border: 1px solid #f3d46b;
+      border-radius: 18px;
+      background: #fffdf4;
+    }
+
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      min-width: 560px;
+    }
+
+    .report-table th,
+    .report-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f6e7a8;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .report-table th {
+      background: #ffe27a;
+      color: #6b4f00;
+      font-weight: 900;
+    }
+
+    .report-table td {
+      color: #4b5563;
+      background: #fffef8;
+    }
+
+    .report-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .report-table td.number {
+      text-align: center;
+      font-weight: 900;
+      color: #111827;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .report-table td.email-cell {
+      text-align: left;
+      font-weight: 700;
+      color: #374151;
+      word-break: break-all;
+    }
+
+    .report-empty {
+      padding: 14px;
+      color: var(--duck-muted);
+      background: #fff9e6;
+      border: 1px solid #fde68a;
+      border-radius: 16px;
+      font-weight: 800;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 14px;
+      }
+
+      .card {
+        padding: 20px;
+        border-radius: 26px;
+      }
+
+      .top-grid,
+      .grid-2,
+      .report-actions,
+      .summary-filter-grid,
+      .modal-actions,
+      .type-options,
+      .summary-cards {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 25px;
+      }
+
+      .duck-face {
+        width: 76px;
+        height: 76px;
+      }
+    }
+  
+
+    .login-panel {
+      margin-top: 18px;
+      padding: 22px;
+      border-radius: 24px;
+      border: 2px solid #ffe08a;
+      background: rgba(255, 253, 242, 0.96);
+    }
+
+    .logout-btn {
+      background: #fff8dc;
+      color: var(--duck-brown);
+      border: 2px solid #ffe08a;
+      box-shadow: none;
+      margin-top: 0;
+    }
+
+    .session-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .session-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="duck-hero">
+      <div class="duck-face"><div class="duck-bill"></div></div>
+    </div>
+
+    <h1>Duck Gift Card Center</h1>
+    <div class="sub">
+      Duck Duck Premium Apple Gift card 🐥
+    </div>
+
+    <div id="loginPanel" class="login-panel">
+      <h2>🔐 เข้าสู่ระบบ</h2>
+
+      <label>Username</label>
+      <input id="loginUsername" type="text" placeholder="เช่น admin หรือ user01" autocomplete="username">
+
+      <label>Password</label>
+      <input id="loginPassword" type="password" placeholder="กรอกรหัสผ่าน" autocomplete="current-password" onkeydown="handleLoginKey(event)">
+
+      <button id="loginBtn" onclick="login()">เข้าสู่ระบบ</button>
+
+      <div class="note">
+       Duck Duck Premium
+      </div>
+    </div>
+
+    <div id="appPanel" class="hidden">
+      <div class="session-row">
+        <div class="top-grid" style="margin-bottom:0;">
+          <div id="accountBox" class="account-box loading">
+            กำลังตรวจสอบผู้ใช้...
+          </div>
+
+          <div id="remainingBox" class="remaining-box loading">
+            กำลังโหลดจำนวนโค้ดคงเหลือ...
+          </div>
+        </div>
+
+        <button class="logout-btn small-btn" onclick="logout()">ออกจากระบบ</button>
+      </div>
+
+      <div id="redeemPanel" class="main-panel hidden">
+        <h2>🐥 เบิกโค้ด Duck</h2>
+
+        <label>ประเภท Gift Card</label>
+        <div class="type-options">
+          <label class="type-option active">
+            <input type="radio" name="giftType" value="400" checked onchange="onGiftTypeChange()">
+            🐤 Duck 400
+          </label>
+
+          <label class="type-option">
+            <input type="radio" name="giftType" value="800" onchange="onGiftTypeChange()">
+            🦆 Duck 800
+          </label>
+        </div>
+
+        <label>อีเมลหัวบ้าน</label>
+        <input id="headEmail" type="email" placeholder="กรอกอีเมลหัวบ้าน">
+
+        <button id="btn" onclick="submitForm()">🐥 เบิกโค้ด</button>
+      </div>
+
+      <button id="historyBtn" class="history-btn" onclick="loadHistory()">📜 ดูประวัติการเบิก</button>
+
+      <div id="adminPanel" class="admin-panel hidden">
+        <div class="admin-section">
+          <h2>🛠️ สร้าง/ตรวจสอบชีท</h2>
+          <div class="report-empty">
+            ใช้ปุ่มนี้หลัง Deploy หรือหลังเปลี่ยนโครงสร้างระบบ เพื่อให้ระบบสร้าง/ตรวจชีท Codes, Users, Sessions, Duck log และ Stock log ให้อัตโนมัติ
+          </div>
+          <button id="setupBtn" class="warning-btn" onclick="setupRequiredSheets()">🛠️ สร้าง/ตรวจสอบชีทที่จำเป็น</button>
+        </div>
+
+        <div class="admin-section">
+          <h2>📦 เติมโค้ดเข้าคลัง</h2>
+
+          <label>ประเภทโค้ดที่ต้องการเติม</label>
+          <select id="stockCodeType">
+            <option value="Duck 400">Duck 400</option>
+            <option value="Duck 800">Duck 800</option>
+          </select>
+
+          <label>วางโค้ดที่ต้องการเติม</label>
+          <textarea id="stockCodes" placeholder="วางโค้ดได้หลายบรรทัด เช่น&#10;CODE111111111111&#10;CODE222222222222"></textarea>
+
+          <label>หมายเหตุ</label>
+          <input id="stockNote" type="text" placeholder="เช่น เติมรอบวันที่ 12/06/2026">
+
+          <button id="stockBtn" class="admin-btn" onclick="addStockCodes()">🐥 เติมโค้ดเข้าคลัง</button>
+          <button class="secondary-btn" onclick="clearStockForm()">ล้างช่องเติมโค้ด</button>
+        </div>
+
+        <div class="admin-section report-box">
+          <h2>📊 รายงานการเบิกโค้ด</h2>
+
+          <div class="summary-filter-grid">
+            <div>
+              <label>กรองตาม Username ผู้เบิก</label>
+              <input id="summaryUsername" type="text" placeholder="เว้นว่าง = แสดงทุก Username">
+            </div>
+
+            <div>
+              <label>เลือกเดือนสำหรับสรุปรายเดือน</label>
+              <input id="summaryMonth" type="month">
+            </div>
+          </div>
+
+          <div class="report-empty" style="margin-top:12px;">
+            สรุปรายวันจะแสดงเฉพาะวันที่ปัจจุบันเท่านั้น ส่วนสรุปรายเดือนจะแสดงตามเดือนที่เลือก
+          </div>
+
+          <div class="report-actions">
+            <button class="admin-btn" onclick="loadRedeemSummary()">📊 ดูรายงาน</button>
+            <button class="secondary-btn" onclick="clearRedeemSummary()">ล้างรายงาน</button>
+          </div>
+
+          <div id="summaryResult"></div>
+        </div>
+
+        <div class="admin-section">
+          <h2>👤 จัดการ Username / Password</h2>
+
+          <label>Username</label>
+          <input id="managedUsername" type="text" placeholder="เช่น user01 หรือ sale01">
+
+          <label>Password</label>
+          <input id="managedPassword" type="password" placeholder="ใส่เมื่อต้องการเพิ่มผู้ใช้ใหม่ หรือเปลี่ยนรหัสผ่าน">
+
+          <label>ชื่อแสดงผล</label>
+          <input id="managedName" type="text" placeholder="เช่น คุณ Duck">
+
+          <div class="grid-2">
+            <div>
+              <label>สิทธิ์</label>
+              <select id="managedRole">
+                <option value="USER">USER</option>
+                <option value="ADMIN">ADMIN</option>
+              </select>
+            </div>
+
+            <div>
+              <label>สถานะ</label>
+              <select id="managedStatus">
+                <option value="ACTIVE">ACTIVE - ใช้งานได้</option>
+                <option value="BLOCKED">BLOCKED - บล็อก</option>
+              </select>
+            </div>
+          </div>
+
+          <label>หมายเหตุ</label>
+          <textarea id="managedNote" placeholder="เช่น พนักงานสาขา A / ปิดสิทธิ์แล้ว"></textarea>
+
+          <button class="admin-btn" onclick="saveManagedUser()">บันทึกผู้ใช้</button>
+          <button class="secondary-btn" onclick="clearManagedForm()">ล้างฟอร์ม</button>
+          <button class="secondary-btn" onclick="loadManagedUsers()">รีเฟรชรายชื่อผู้ใช้</button>
+
+          <div id="userList" class="user-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="result" class="result"></div>
+
+    <div class="note">
+      🐥 Duck Gift Card 400 / 800
+    </div>
+  </div>
+
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal">
+      <h2>🐥 เบิกโค้ดสำเร็จ</h2>
+      <div class="modal-sub">โค้ดที่ได้รับมีดังนี้</div>
+
+      <div id="popupCodes" class="code-box"></div>
+      <div id="popupRemain" class="remain"></div>
+
+      <div class="modal-actions">
+        <button class="copy-btn" onclick="copyCodes()">คัดลอกโค้ด</button>
+        <button class="close-btn" onclick="closePopup()">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="historyOverlay" class="modal-overlay">
+    <div class="modal">
+      <h2>📜 ประวัติการเบิกโค้ด</h2>
+      <div class="modal-sub">แสดงประวัติการเบิกล่าสุด 50 รายการ</div>
+
+      <div id="historyContent" class="history-list"></div>
+
+      <div class="modal-actions single">
+        <button class="close-btn" onclick="closeHistoryPopup()">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- Supabase client + shim (มาแทนที่ Google Apps Script)          -->
+  <!-- *** แก้ค่า 2 บรรทัดด้านล่างให้เป็นของโปรเจกต์พี่ ***            -->
+  <!-- ============================================================ -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://uwgugcnjvoqlmntgxlnv.supabase.co';   // <-- Project URL
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3Z3VnY25qdm9xbG1udGd4bG52Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNDQzNDAsImV4cCI6MjA5NzYyMDM0MH0.acnwMbvkspX8UiYNHiknwiIUqocli4NFvSNXlYmJGCM';          // <-- anon public key
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function _auth(p) { return (p && p.auth) ? p.auth : { username: '', token: '' }; }
+
+    const RPC_MAP = {
+      loginUser:        { fn: 'auth_login',           args: p => ({ p_username: p.username, p_password: p.password }) },
+      checkSession:     { fn: 'auth_check',            args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token }) },
+      logoutUser:       { fn: 'auth_logout',           args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token }) },
+      setupSheets:      { fn: 'setup_sheets',          args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token }) },
+      getRemainingCodes:{ fn: 'get_remaining_codes',   args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_code_type: p.codeType }) },
+      redeemCodes:      { fn: 'redeem_code',           args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_gift_type: p.codeType, p_head_email: p.headEmail }) },
+      getRedeemHistory: { fn: 'get_redeem_history',    args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token }) },
+      getRedeemSummary: { fn: 'get_redeem_summary',    args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_target_username: p.targetUsername || '', p_month: p.month || '' }) },
+      addStockCodes:    { fn: 'add_stock_codes',       args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_gift_type: p.codeType, p_raw_codes: p.rawCodes, p_note: p.note || '' }) },
+      getManagedUsers:  { fn: 'get_managed_users',     args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token }) },
+      upsertManagedUser:{ fn: 'upsert_managed_user',   args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_managed_username: p.username, p_password: p.password || '', p_display_name: p.displayName || '', p_role: p.role || 'USER', p_status: p.status || 'ACTIVE', p_note: p.note || '' }) },
+      setManagedUserStatus: { fn: 'set_managed_user_status', args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_managed_username: p.username, p_status: p.status }) }
+    };
+
+    function _makeRunner() {
+      let onSuccess = function () {};
+      let onFailure = function (e) { console.error(e); };
+
+      const runner = {
+        withSuccessHandler: function (fn) { if (fn) onSuccess = fn; return runner; },
+        withFailureHandler: function (fn) { if (fn) onFailure = fn; return runner; }
+      };
+
+      Object.keys(RPC_MAP).forEach(function (name) {
+        runner[name] = function (payload) {
+          const spec = RPC_MAP[name];
+          sb.rpc(spec.fn, spec.args(payload || {}))
+            .then(function (r) {
+              if (r.error) { onFailure(new Error(r.error.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ')); return; }
+              onSuccess(r.data);
+            })
+            .catch(function (err) { onFailure(err); });
+        };
+      });
+
+      return runner;
+    }
+
+    // เลียนแบบ google.script.run โดยคืน runner ใหม่ทุกครั้ง (กัน state ปนกัน)
+    window.google = window.google || {};
+    Object.defineProperty(window.google, 'script', {
+      configurable: true,
+      get: function () { return { get run() { return _makeRunner(); } }; }
+    });
+  </script>
+
+  <script>
+    const SESSION_KEY = 'duck_gift_auth_v2';
+
+    let latestCodes = [];
+    let currentUser = null;
+    let managedUsersCache = [];
+    let auth = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      restoreSession();
+    });
+
+    function handleLoginKey(event) {
+      if (event.key === 'Enter') {
+        login();
+      }
+    }
+
+    function getAuthPayload() {
+      return auth || { username: '', token: '' };
+    }
+
+    function saveSession(username, token) {
+      auth = {
+        username: String(username || '').trim().toLowerCase(),
+        token: String(token || '').trim()
+      };
+
+      localStorage.setItem(SESSION_KEY, JSON.stringify(auth));
+    }
+
+    function clearSession() {
+      auth = null;
+      currentUser = null;
+      localStorage.removeItem(SESSION_KEY);
+    }
+
+    function restoreSession() {
+      let saved = null;
+
+      try {
+        saved = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+      } catch (err) {
+        saved = null;
+      }
+
+      if (!saved || !saved.username || !saved.token) {
+        showLoginPanel();
+        return;
+      }
+
+      auth = saved;
+      showAppPanelLoading();
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (!res || !res.ok) {
+            clearSession();
+            showLoginPanel();
+            if (res && res.message) {
+              showError(res.message);
+            }
+            return;
+          }
+
+          currentUser = res.user;
+          showAppPanel();
+          renderAccountBox(currentUser);
+          renderRemaining(res.remaining || 0, normalizeDisplayCodeType(res.codeType || getSelectedCodeType()));
+          afterAuthReady();
+        })
+        .withFailureHandler(function(err) {
+          clearSession();
+          showLoginPanel();
+          showError('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .checkSession({
+          auth: getAuthPayload()
+        });
+    }
+
+    function login() {
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('loginBtn');
+
+      hideResult();
+
+      if (!username) {
+        showError('กรุณากรอก Username');
+        return;
+      }
+
+      if (!password) {
+        showError('กรุณากรอกรหัสผ่าน');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'กำลังเข้าสู่ระบบ...';
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          btn.disabled = false;
+          btn.textContent = 'เข้าสู่ระบบ';
+
+          if (!res || !res.ok) {
+            showError(res && res.message ? res.message : 'เข้าสู่ระบบไม่สำเร็จ');
+            return;
+          }
+
+          saveSession(username, res.token);
+          currentUser = res.user;
+
+          document.getElementById('loginPassword').value = '';
+
+          showAppPanel();
+          renderAccountBox(currentUser);
+          renderRemaining(res.remaining || 0, normalizeDisplayCodeType(res.codeType || getSelectedCodeType()));
+          afterAuthReady();
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.textContent = 'เข้าสู่ระบบ';
+          showError('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .loginUser({
+          username: username,
+          password: password
+        });
+    }
+
+    function logout() {
+      const oldAuth = getAuthPayload();
+
+      google.script.run
+        .withSuccessHandler(function() {
+          clearSession();
+          showLoginPanel();
+          showSuccess('ออกจากระบบแล้ว');
+        })
+        .withFailureHandler(function() {
+          clearSession();
+          showLoginPanel();
+        })
+        .logoutUser({
+          auth: oldAuth
+        });
+    }
+
+    function showLoginPanel() {
+      document.getElementById('loginPanel').classList.remove('hidden');
+      document.getElementById('appPanel').classList.add('hidden');
+      document.getElementById('adminPanel').classList.add('hidden');
+      document.getElementById('redeemPanel').classList.add('hidden');
+      document.getElementById('historyBtn').style.display = 'none';
+    }
+
+    function showAppPanelLoading() {
+      document.getElementById('loginPanel').classList.add('hidden');
+      document.getElementById('appPanel').classList.remove('hidden');
+      document.getElementById('accountBox').className = 'account-box loading';
+      document.getElementById('accountBox').textContent = 'กำลังตรวจสอบผู้ใช้...';
+      document.getElementById('remainingBox').className = 'remaining-box loading';
+      document.getElementById('remainingBox').textContent = 'กำลังโหลดจำนวนโค้ดคงเหลือ...';
+    }
+
+    function showAppPanel() {
+      document.getElementById('loginPanel').classList.add('hidden');
+      document.getElementById('appPanel').classList.remove('hidden');
+    }
+
+    function afterAuthReady() {
+      if (!currentUser || !currentUser.allowed) {
+        document.getElementById('redeemPanel').classList.add('hidden');
+        document.getElementById('historyBtn').style.display = 'none';
+        document.getElementById('adminPanel').classList.add('hidden');
+        showError('บัญชีนี้ยังไม่ได้รับอนุญาตให้ใช้งาน หรือถูกปิดสิทธิ์แล้ว');
+        return;
+      }
+
+      document.getElementById('redeemPanel').classList.remove('hidden');
+      document.getElementById('historyBtn').style.display = 'block';
+
+      if (currentUser.admin) {
+        document.getElementById('adminPanel').classList.remove('hidden');
+        setDefaultSummaryMonth();
+        loadManagedUsers();
+      } else {
+        document.getElementById('adminPanel').classList.add('hidden');
+      }
+
+      updateTypeOptionUI();
+      refreshRemainingCodes();
+    }
+
+    function normalizeDisplayCodeType(text) {
+      return String(text || '').replace(/Cat4K/g, 'Duck');
+    }
+
+    function getSelectedGiftType() {
+      const checked = document.querySelector('input[name="giftType"]:checked');
+      return checked ? checked.value : '400';
+    }
+
+    function getSelectedCodeType() {
+      return 'Duck ' + getSelectedGiftType();
+    }
+
+    function updateTypeOptionUI() {
+      const options = document.querySelectorAll('.type-option');
+
+      options.forEach(function(label) {
+        const input = label.querySelector('input[type="radio"]');
+
+        if (input && input.checked) {
+          label.classList.add('active');
+        } else {
+          label.classList.remove('active');
+        }
+      });
+    }
+
+    function onGiftTypeChange() {
+      updateTypeOptionUI();
+      refreshRemainingCodes();
+    }
+
+    function setDefaultSummaryMonth() {
+      const monthInput = document.getElementById('summaryMonth');
+
+      if (!monthInput || monthInput.value) {
+        return;
+      }
+
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      monthInput.value = year + '-' + month;
+    }
+
+    function renderAccountBox(user) {
+      const box = document.getElementById('accountBox');
+
+      if (!user || !user.username) {
+        renderAccountError('ไม่พบข้อมูลผู้ใช้');
+        return;
+      }
+
+      box.className = user.allowed ? 'account-box' : 'account-box error';
+
+      if (user.admin) {
+        box.textContent =
+          'ผู้ใช้: ' + (user.displayName || user.username) +
+          ' | Username: ' + user.username +
+          ' | สถานะ: ' + user.status +
+          ' | สิทธิ์: ' + user.role;
+        return;
+      }
+
+      box.textContent = 'ผู้ใช้: ' + (user.displayName || user.username) + ' | Username: ' + user.username;
+    }
+
+    function renderAccountError(message) {
+      const box = document.getElementById('accountBox');
+      box.className = 'account-box error';
+      box.textContent = message;
+    }
+
+    function refreshRemainingCodes() {
+      if (!currentUser || !currentUser.allowed) {
+        return;
+      }
+
+      const codeType = getSelectedCodeType();
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (!res || !res.ok) {
+            renderRemainingError(res && res.message ? res.message : 'โหลดจำนวนโค้ดคงเหลือไม่สำเร็จ');
+            return;
+          }
+
+          renderRemaining(res.remaining || 0, normalizeDisplayCodeType(res.codeType || codeType));
+        })
+        .withFailureHandler(function() {
+          renderRemainingError('โหลดจำนวนโค้ดคงเหลือไม่สำเร็จ');
+        })
+        .getRemainingCodes({
+          auth: getAuthPayload(),
+          codeType: codeType
+        });
+    }
+
+    function renderRemaining(remaining, codeType) {
+      const box = document.getElementById('remainingBox');
+      const label = normalizeDisplayCodeType(codeType || getSelectedCodeType());
+
+      if (Number(remaining) <= 0) {
+        box.className = 'remaining-box empty';
+        box.textContent = 'โค้ด ' + label + ' คงเหลือ: 0 โค้ด';
+      } else {
+        box.className = 'remaining-box';
+        box.textContent = 'โค้ด ' + label + ' คงเหลือ: ' + remaining + ' โค้ด';
+      }
+    }
+
+    function renderRemainingError(message) {
+      const box = document.getElementById('remainingBox');
+      box.className = 'remaining-box empty';
+      box.textContent = message;
+    }
+
+    function setupRequiredSheets() {
+      if (!currentUser || !currentUser.admin) {
+        showError('เฉพาะแอดมินเท่านั้นที่สามารถสร้าง/ตรวจสอบชีทได้');
+        return;
+      }
+
+      const btn = document.getElementById('setupBtn');
+      btn.disabled = true;
+      btn.textContent = 'กำลังสร้าง/ตรวจสอบชีท...';
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          btn.disabled = false;
+          btn.textContent = '🛠️ สร้าง/ตรวจสอบชีทที่จำเป็น';
+
+          if (!res || !res.ok) {
+            showError(res && res.message ? res.message : 'สร้าง/ตรวจสอบชีทไม่สำเร็จ');
+            return;
+          }
+
+          showSuccess(res.message || 'สร้าง/ตรวจสอบชีทเรียบร้อยแล้ว');
+          refreshRemainingCodes();
+          loadManagedUsers();
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.textContent = '🛠️ สร้าง/ตรวจสอบชีทที่จำเป็น';
+          showError('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .setupSheets({
+          auth: getAuthPayload()
+        });
+    }
+
+    function submitForm() {
+      const codeType = getSelectedCodeType();
+      const headEmail = document.getElementById('headEmail').value.trim();
+      const btn = document.getElementById('btn');
+
+      hideResult();
+
+      if (!currentUser || !currentUser.allowed) {
+        showError('บัญชีนี้ยังไม่ได้รับอนุญาตให้ใช้งาน หรือถูกปิดสิทธิ์แล้ว');
+        return;
+      }
+
+      if (!headEmail) {
+        showError('กรุณากรอกอีเมลหัวบ้าน');
+        return;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(headEmail)) {
+        showError('รูปแบบอีเมลหัวบ้านไม่ถูกต้อง');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'กำลังเบิกโค้ด...';
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          btn.disabled = false;
+          btn.textContent = '🐥 เบิกโค้ด';
+
+          if (!res) {
+            showError('ระบบไม่ส่งข้อมูลกลับมา กรุณาตรวจสอบการเชื่อมต่อ Supabase');
+            return;
+          }
+
+          if (!res.ok) {
+            showError(res.message || 'เบิกโค้ดไม่สำเร็จ');
+            refreshRemainingCodes();
+            return;
+          }
+
+          latestCodes = res.codes || [];
+
+          showSuccess(
+            'เบิกโค้ดสำเร็จ ' + latestCodes.length + ' โค้ด<br>' +
+            'ประเภทโค้ด: ' + escapeHtml(normalizeDisplayCodeType(res.codeType || codeType)) + '<br>' +
+            'ผู้เบิก: ' + escapeHtml(res.displayName || res.username || currentUser.username) + '<br>' +
+            'โค้ดคงเหลือในระบบ: ' + escapeHtml(res.remaining) + ' โค้ด'
+          );
+
+          openPopup(latestCodes, res.remaining);
+          refreshRemainingCodes();
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.textContent = '🐥 เบิกโค้ด';
+          showError('เกิดข้อผิดพลาด: ' + (err.message || err));
+          refreshRemainingCodes();
+        })
+        .redeemCodes({
+          auth: getAuthPayload(),
+          codeType: codeType,
+          headEmail: headEmail
+        });
+    }
+
+    function loadHistory() {
+      if (!currentUser || !currentUser.allowed) {
+        showError('บัญชีนี้ยังไม่ได้รับอนุญาตให้ใช้งาน หรือถูกปิดสิทธิ์แล้ว');
+        return;
+      }
+
+      showSuccess('กำลังโหลดประวัติ...');
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          hideResult();
+
+          if (!res) {
+            showError('ระบบไม่ส่งข้อมูลประวัติกลับมา');
+            return;
+          }
+
+          if (!res.ok) {
+            showError(res.message || 'ไม่สามารถดูประวัติได้');
+            return;
+          }
+
+          openHistoryPopup(res.history || []);
+        })
+        .withFailureHandler(function(err) {
+          showError('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .getRedeemHistory({
+          auth: getAuthPayload()
+        });
+    }
+
+    function addStockCodes() {
+      if (!currentUser || !currentUser.admin) {
+        showError('เฉพาะแอดมินเท่านั้นที่สามารถเติมโค้ดเข้าคลังได้');
+        return;
+      }
+
+      const codeType = document.getElementById('stockCodeType').value;
+      const rawCodes = document.getElementById('stockCodes').value.trim();
+      const note = document.getElementById('stockNote').value.trim();
+      const btn = document.getElementById('stockBtn');
+
+      if (!rawCodes) {
+        showError('กรุณาวางโค้ดที่ต้องการเติมเข้าคลัง');
+        return;
+      }
+
+      if (!confirm('ยืนยันเติมโค้ดเข้าคลัง ' + codeType + ' หรือไม่?\nระบบจะตัดโค้ดซ้ำให้อัตโนมัติ')) {
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'กำลังเติมโค้ด...';
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          btn.disabled = false;
+          btn.textContent = '🐥 เติมโค้ดเข้าคลัง';
+
+          if (!res) {
+            showError('ระบบไม่ส่งข้อมูลกลับมา');
+            return;
+          }
+
+          if (!res.ok) {
+            showError(res.message || 'เติมโค้ดไม่สำเร็จ');
+            return;
+          }
+
+          showSuccess(
+            escapeHtml(res.message || 'เติมโค้ดสำเร็จ') + '<br>' +
+            'ประเภทโค้ด: ' + escapeHtml(normalizeDisplayCodeType(res.codeType || codeType)) + '<br>' +
+            'เพิ่มใหม่: ' + escapeHtml(res.added || 0) + ' โค้ด<br>' +
+            'ซ้ำในข้อความที่วาง: ' + escapeHtml(res.duplicateInInput || 0) + ' โค้ด<br>' +
+            'ซ้ำกับระบบ/เคยเบิกแล้ว: ' + escapeHtml(res.duplicateInSystem || 0) + ' โค้ด<br>' +
+            'รูปแบบไม่ถูกต้อง: ' + escapeHtml(res.invalid || 0) + ' รายการ<br>' +
+            'คงเหลือในคลังตอนนี้: ' + escapeHtml(res.remaining || 0) + ' โค้ด'
+          );
+
+          if (Number(res.added || 0) > 0) {
+            document.getElementById('stockCodes').value = '';
+          }
+
+          refreshRemainingCodes();
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.textContent = '🐥 เติมโค้ดเข้าคลัง';
+          showError('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .addStockCodes({
+          auth: getAuthPayload(),
+          codeType: codeType,
+          rawCodes: rawCodes,
+          note: note
+        });
+    }
+
+    function clearStockForm() {
+      document.getElementById('stockCodeType').value = 'Duck 400';
+      document.getElementById('stockCodes').value = '';
+      document.getElementById('stockNote').value = '';
+    }
+
+    function loadRedeemSummary() {
+      if (!currentUser || !currentUser.allowed) {
+        showError('บัญชีนี้ยังไม่ได้รับอนุญาตให้ใช้งาน หรือถูกปิดสิทธิ์แล้ว');
+        return;
+      }
+
+      if (!currentUser.admin) {
+        showError('เฉพาะแอดมินเท่านั้นที่สามารถดูรายงานได้');
+        return;
+      }
+
+      const targetUsername = document.getElementById('summaryUsername').value.trim();
+      const month = document.getElementById('summaryMonth').value.trim();
+      const box = document.getElementById('summaryResult');
+
+      box.innerHTML = '<div class="report-empty">กำลังโหลดรายงาน...</div>';
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (!res) {
+            box.innerHTML = '<div class="report-empty">ระบบไม่ส่งข้อมูลกลับมา</div>';
+            return;
+          }
+
+          if (!res.ok) {
+            box.innerHTML = '<div class="report-empty">' + escapeHtml(res.message || 'โหลดรายงานไม่สำเร็จ') + '</div>';
+            return;
+          }
+
+          renderRedeemSummary(res.dailySummary || [], res.monthlySummary || [], res.today || '', res.month || '');
+        })
+        .withFailureHandler(function(err) {
+          box.innerHTML = '<div class="report-empty">เกิดข้อผิดพลาด: ' + escapeHtml(err.message || err) + '</div>';
+        })
+        .getRedeemSummary({
+          auth: getAuthPayload(),
+          targetUsername: targetUsername,
+          month: month
+        });
+    }
+
+    function renderRedeemSummary(dailySummary, monthlySummary, today, month) {
+      const box = document.getElementById('summaryResult');
+      const grandTotal = calculateGrandTotal_(monthlySummary);
+
+      let html = '';
+
+      html += '<div class="summary-cards">';
+      html += '<div class="summary-card"><div class="summary-card-label">🐤 Duck 400</div><div class="summary-card-value">' + escapeHtml(grandTotal.duck400) + '</div></div>';
+      html += '<div class="summary-card"><div class="summary-card-label">🦆 Duck 800</div><div class="summary-card-value">' + escapeHtml(grandTotal.duck800) + '</div></div>';
+      html += '<div class="summary-card"><div class="summary-card-label">📦 รวมเดือนนี้</div><div class="summary-card-value">' + escapeHtml(grandTotal.total) + '</div></div>';
+      html += '</div>';
+
+      html += '<div class="report-section">';
+      html += '<div class="report-title">📅 สรุปรายวัน เฉพาะวันนี้</div>';
+      html += renderReportTable_(dailySummary, 'daily');
+      html += '</div>';
+
+      html += '<div class="report-section">';
+      html += '<div class="report-title">🗓️ สรุปรายเดือน ' + escapeHtml(month || '') + '</div>';
+      html += renderReportTable_(monthlySummary, 'monthly');
+      html += '</div>';
+
+      box.innerHTML = html;
+    }
+
+    function renderReportTable_(items, mode) {
+      if (!items.length) {
+        return '<div class="report-empty">ไม่พบข้อมูล</div>';
+      }
+
+      const firstHeader = mode === 'monthly' ? 'เดือน' : 'วันที่';
+
+      let html = '';
+      html += '<div class="report-table-wrap">';
+      html += '<table class="report-table">';
+      html += '<thead><tr>';
+      html += '<th>' + firstHeader + '</th>';
+      html += '<th>ชื่อผู้เบิก</th>';
+      html += '<th>Duck 400</th>';
+      html += '<th>Duck 800</th>';
+      html += '<th>รวม</th>';
+      html += '</tr></thead>';
+      html += '<tbody>';
+
+      items.forEach(function(item) {
+        const firstValue = mode === 'monthly' ? item.displayMonth : item.displayDate;
+
+        html += '<tr>';
+        html += '<td>' + escapeHtml(firstValue || '') + '</td>';
+        html += '<td class="email-cell">' +escapeHtml(item.displayName || item.username || '') +'</td>';
+        html += '<td class="number">' + escapeHtml(item.duck400 || 0) + '</td>';
+        html += '<td class="number">' + escapeHtml(item.duck800 || 0) + '</td>';
+        html += '<td class="number">' + escapeHtml(item.total || 0) + '</td>';
+        html += '</tr>';
+      });
+
+      html += '</tbody></table></div>';
+
+      return html;
+    }
+
+    function calculateGrandTotal_(items) {
+      return items.reduce(function(sum, item) {
+        sum.duck400 += Number(item.duck400 || 0);
+        sum.duck800 += Number(item.duck800 || 0);
+        sum.total += Number(item.total || 0);
+        return sum;
+      }, {
+        duck400: 0,
+        duck800: 0,
+        total: 0
+      });
+    }
+
+    function clearRedeemSummary() {
+      document.getElementById('summaryUsername').value = '';
+      document.getElementById('summaryResult').innerHTML = '';
+      setDefaultSummaryMonth();
+    }
+
+    function loadManagedUsers() {
+      if (!currentUser || !currentUser.admin) {
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (!res || !res.ok) {
+            showError(res && res.message ? res.message : 'โหลดรายชื่อผู้ใช้ไม่สำเร็จ');
+            return;
+          }
+
+          managedUsersCache = res.users || [];
+          renderManagedUsers();
+        })
+        .withFailureHandler(function(err) {
+          showError('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .getManagedUsers({
+          auth: getAuthPayload()
+        });
+    }
+
+    function saveManagedUser() {
+      if (!currentUser || !currentUser.admin) {
+        showError('เฉพาะแอดมินเท่านั้นที่สามารถจัดการผู้ใช้ได้');
+        return;
+      }
+
+      const username = document.getElementById('managedUsername').value.trim();
+      const password = document.getElementById('managedPassword').value;
+      const displayName = document.getElementById('managedName').value.trim();
+      const role = document.getElementById('managedRole').value;
+      const status = document.getElementById('managedStatus').value;
+      const note = document.getElementById('managedNote').value.trim();
+
+      if (!username) {
+        showError('กรุณากรอก Username');
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (!res || !res.ok) {
+            showError(res && res.message ? res.message : 'บันทึกผู้ใช้ไม่สำเร็จ');
+            return;
+          }
+
+          managedUsersCache = res.users || [];
+          renderManagedUsers();
+          clearManagedForm();
+          showSuccess(res.message || 'บันทึกเรียบร้อยแล้ว');
+        })
+        .withFailureHandler(function(err) {
+          showError('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .upsertManagedUser({
+          auth: getAuthPayload(),
+          username: username,
+          password: password,
+          displayName: displayName,
+          role: role,
+          status: status,
+          note: note
+        });
+    }
+
+    function renderManagedUsers() {
+      const box = document.getElementById('userList');
+
+      if (!managedUsersCache.length) {
+        box.innerHTML = '<div class="user-item">ยังไม่มีรายชื่อผู้ใช้</div>';
+        return;
+      }
+
+      box.innerHTML = managedUsersCache.map(function(user, index) {
+        const statusClass = user.status === 'ACTIVE' ? 'badge-active' : 'badge-blocked';
+        const roleClass = user.role === 'ADMIN' ? 'badge-admin' : 'badge-user';
+        const toggleText = user.status === 'ACTIVE' ? 'บล็อก' : 'เปิดสิทธิ์';
+        const toggleClass = user.status === 'ACTIVE' ? 'block-btn' : 'active-btn';
+
+        let html = '';
+        html += '<div class="user-item">';
+        html += '<div class="user-email">' + escapeHtml(user.username || '') + '</div>';
+        html += '<div class="user-meta">';
+        html += escapeHtml(user.displayName || '-') + '<br>';
+        html += '<span class="badge ' + statusClass + '">' + escapeHtml(user.status || '') + '</span>';
+        html += '<span class="badge ' + roleClass + '">' + escapeHtml(user.role || '') + '</span>';
+        html += user.hasPassword ? '<span class="badge badge-active">มีรหัสผ่าน</span>' : '<span class="badge badge-blocked">ยังไม่มีรหัสผ่าน</span>';
+        html += '<br>แก้ไขล่าสุด: ' + escapeHtml(user.updatedAt || '-');
+        if (user.note) {
+          html += '<br>หมายเหตุ: ' + escapeHtml(user.note);
+        }
+        html += '</div>';
+
+        html += '<div class="user-actions">';
+        html += '<button class="small-btn edit-btn" onclick="editManagedUser(' + index + ')">แก้ไข</button>';
+        html += '<button class="small-btn ' + toggleClass + '" onclick="toggleManagedUserStatus(' + index + ')">' + toggleText + '</button>';
+        html += '</div>';
+
+        html += '</div>';
+
+        return html;
+      }).join('');
+    }
+
+    function editManagedUser(index) {
+      const user = managedUsersCache[index];
+
+      if (!user) {
+        return;
+      }
+
+      document.getElementById('managedUsername').value = user.username || '';
+      document.getElementById('managedPassword').value = '';
+      document.getElementById('managedName').value = user.displayName || '';
+      document.getElementById('managedRole').value = user.role || 'USER';
+      document.getElementById('managedStatus').value = user.status || 'ACTIVE';
+      document.getElementById('managedNote').value = user.note || '';
+
+      document.getElementById('managedUsername').scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+
+    function toggleManagedUserStatus(index) {
+      const user = managedUsersCache[index];
+
+      if (!user) {
+        return;
+      }
+
+      const nextStatus = user.status === 'ACTIVE' ? 'BLOCKED' : 'ACTIVE';
+
+      if (!confirm('ยืนยันเปลี่ยนสถานะ ' + user.username + ' เป็น ' + nextStatus + ' หรือไม่?')) {
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (!res || !res.ok) {
+            showError(res && res.message ? res.message : 'เปลี่ยนสถานะไม่สำเร็จ');
+            return;
+          }
+
+          managedUsersCache = res.users || [];
+          renderManagedUsers();
+          showSuccess(res.message || 'เปลี่ยนสถานะเรียบร้อยแล้ว');
+        })
+        .withFailureHandler(function(err) {
+          showError('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .setManagedUserStatus({
+          auth: getAuthPayload(),
+          username: user.username,
+          status: nextStatus
+        });
+    }
+
+    function clearManagedForm() {
+      document.getElementById('managedUsername').value = '';
+      document.getElementById('managedPassword').value = '';
+      document.getElementById('managedName').value = '';
+      document.getElementById('managedRole').value = 'USER';
+      document.getElementById('managedStatus').value = 'ACTIVE';
+      document.getElementById('managedNote').value = '';
+    }
+
+    function openPopup(codes, remaining) {
+      latestCodes = codes || [];
+      document.getElementById('popupCodes').textContent = latestCodes.join('\n');
+      document.getElementById('popupRemain').textContent = 'โค้ดคงเหลือในระบบ: ' + remaining + ' โค้ด';
+      document.getElementById('modalOverlay').style.display = 'flex';
+    }
+
+    function closePopup() {
+      document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    function copyCodes() {
+      const text = latestCodes.join('\n');
+
+      if (!text) {
+        return;
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          showSuccess('คัดลอกโค้ดแล้ว');
+        }).catch(function() {
+          fallbackCopyText(text);
+        });
+      } else {
+        fallbackCopyText(text);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      showSuccess('คัดลอกโค้ดแล้ว');
+    }
+
+    function openHistoryPopup(history) {
+      const box = document.getElementById('historyContent');
+
+      if (!history.length) {
+        box.innerHTML = '<div class="report-empty">ยังไม่มีประวัติการเบิก</div>';
+      } else {
+        box.innerHTML = history.map(function(item) {
+          let html = '';
+          html += '<div class="history-item">';
+          html += '<div class="history-name">' + escapeHtml(normalizeDisplayCodeType(item.codeType || '')) + '</div>';
+          html += '<div class="history-time">';
+          html += 'เวลา: ' + escapeHtml(item.timestamp || '-') + '<br>';
+          html += 'ผู้เบิก: ' + escapeHtml(item.username || '-') + '<br>';
+          html += 'อีเมลหัวบ้าน: ' + escapeHtml(item.headEmail || '-') + '<br>';
+          html += 'จำนวน: ' + escapeHtml(item.qty || '-') + ' โค้ด';
+          html += '</div>';
+          html += '<div class="history-codes">' + escapeHtml(item.codes || '') + '</div>';
+          html += '</div>';
+          return html;
+        }).join('');
+      }
+
+      document.getElementById('historyOverlay').style.display = 'flex';
+    }
+
+    function closeHistoryPopup() {
+      document.getElementById('historyOverlay').style.display = 'none';
+    }
+
+    function showSuccess(message) {
+      const result = document.getElementById('result');
+      result.className = 'result success';
+      result.style.display = 'block';
+      result.innerHTML = message;
+    }
+
+    function showError(message) {
+      const result = document.getElementById('result');
+      result.className = 'result error';
+      result.style.display = 'block';
+      result.innerHTML = escapeHtml(message || 'เกิดข้อผิดพลาด');
+    }
+
+    function hideResult() {
+      const result = document.getElementById('result');
+      result.className = 'result';
+      result.style.display = 'none';
+      result.innerHTML = '';
+    }
+
+    function escapeHtml(value) {
+      return String(value === undefined || value === null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>
