@@ -829,14 +829,6 @@
 
       <div id="adminPanel" class="admin-panel hidden">
         <div class="admin-section">
-          <h2>🛠️ สร้าง/ตรวจสอบชีท</h2>
-          <div class="report-empty">
-            ใช้ปุ่มนี้หลัง Deploy หรือหลังเปลี่ยนโครงสร้างระบบ เพื่อให้ระบบสร้าง/ตรวจชีท Codes, Users, Sessions, Duck log และ Stock log ให้อัตโนมัติ
-          </div>
-          <button id="setupBtn" class="warning-btn" onclick="setupRequiredSheets()">🛠️ สร้าง/ตรวจสอบชีทที่จำเป็น</button>
-        </div>
-
-        <div class="admin-section">
           <h2>📦 เติมโค้ดเข้าคลัง</h2>
 
           <label>ประเภทโค้ดที่ต้องการเติม</label>
@@ -1330,40 +1322,6 @@
       const box = document.getElementById('remainingBox');
       box.className = 'remaining-box empty';
       box.textContent = message;
-    }
-
-    function setupRequiredSheets() {
-      if (!currentUser || !currentUser.admin) {
-        showError('เฉพาะแอดมินเท่านั้นที่สามารถสร้าง/ตรวจสอบชีทได้');
-        return;
-      }
-
-      const btn = document.getElementById('setupBtn');
-      btn.disabled = true;
-      btn.textContent = 'กำลังสร้าง/ตรวจสอบชีท...';
-
-      google.script.run
-        .withSuccessHandler(function(res) {
-          btn.disabled = false;
-          btn.textContent = '🛠️ สร้าง/ตรวจสอบชีทที่จำเป็น';
-
-          if (!res || !res.ok) {
-            showError(res && res.message ? res.message : 'สร้าง/ตรวจสอบชีทไม่สำเร็จ');
-            return;
-          }
-
-          showSuccess(res.message || 'สร้าง/ตรวจสอบชีทเรียบร้อยแล้ว');
-          refreshRemainingCodes();
-          loadManagedUsers();
-        })
-        .withFailureHandler(function(err) {
-          btn.disabled = false;
-          btn.textContent = '🛠️ สร้าง/ตรวจสอบชีทที่จำเป็น';
-          showError('เกิดข้อผิดพลาด: ' + (err.message || err));
-        })
-        .setupSheets({
-          auth: getAuthPayload()
-        });
     }
 
     function submitForm() {
