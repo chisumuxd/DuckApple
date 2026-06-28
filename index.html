@@ -848,7 +848,16 @@
           <button id="stockBtn" class="admin-btn" onclick="addStockCodes()">🐥 เติมโค้ดเข้าคลัง</button>
           <button class="secondary-btn" onclick="clearStockForm()">ล้างช่องเติมโค้ด</button>
         </div>
-
+          <div class="admin-section">
+          <h2>🗄️ เช็คโค้ดในคลัง</h2>
+          <div class="report-empty" style="margin-top:4px;">แสดงจำนวนโค้ดคงเหลือในคลังของแต่ละประเภท</div>
+          <div class="report-actions">
+            <button class="admin-btn" onclick="loadStockCheck()">🔄 เช็คสต็อก</button>
+            <button class="secondary-btn" onclick="document.getElementById('stockCheckResult').innerHTML=''">ล้าง</button>
+          </div>
+          <div id="stockCheckResult"></div>
+        </div>
+        
         <div class="admin-section report-box">
           <h2>📊 รายงานการเบิกโค้ด</h2>
 
@@ -858,6 +867,11 @@
               <input id="summaryUsername" type="text" placeholder="เว้นว่าง = แสดงทุก Username">
             </div>
 
+            <div>
+              <label>เลือกวันสำหรับสรุปรายวัน</label>
+              <input id="summaryDate" type="date">
+            </div>
+           
             <div>
               <label>เลือกเดือนสำหรับสรุปรายเดือน</label>
               <input id="summaryMonth" type="month">
@@ -974,7 +988,7 @@
       getRemainingCodes:{ fn: 'get_remaining_codes',   args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_code_type: p.codeType }) },
       redeemCodes:      { fn: 'redeem_code',           args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_gift_type: p.codeType, p_head_email: p.headEmail }) },
       getRedeemHistory: { fn: 'get_redeem_history',    args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token }) },
-      getRedeemSummary: { fn: 'get_redeem_summary',    args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_target_username: p.targetUsername || '', p_month: p.month || '' }) },
+      getRedeemSummary: { fn: 'get_redeem_summary',    args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_target_username: p.targetUsername || '', p_month: p.month || '', p_date: p.date || '' }) },
       addStockCodes:    { fn: 'add_stock_codes',       args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_gift_type: p.codeType, p_raw_codes: p.rawCodes, p_note: p.note || '' }) },
       getManagedUsers:  { fn: 'get_managed_users',     args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token }) },
       upsertManagedUser:{ fn: 'upsert_managed_user',   args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_managed_username: p.username, p_password: p.password || '', p_display_name: p.displayName || '', p_role: p.role || 'USER', p_status: p.status || 'ACTIVE', p_note: p.note || '' }) },
@@ -1510,6 +1524,7 @@
 
       const targetUsername = document.getElementById('summaryUsername').value.trim();
       const month = document.getElementById('summaryMonth').value.trim();
+      const date = document.getElementById('summaryDate').value.trim();   // ← เพิ่ม
       const box = document.getElementById('summaryResult');
 
       box.innerHTML = '<div class="report-empty">กำลังโหลดรายงาน...</div>';
@@ -1534,7 +1549,8 @@
         .getRedeemSummary({
           auth: getAuthPayload(),
           targetUsername: targetUsername,
-          month: month
+          month: month,
+          date: date
         });
     }
 
@@ -1551,7 +1567,7 @@
       html += '</div>';
 
       html += '<div class="report-section">';
-      html += '<div class="report-title">📅 สรุปรายวัน เฉพาะวันนี้</div>';
+      html += '<div class="report-title">📅 สรุปรายวัน ' + escapeHtml(today || '') + '</div>';
       html += renderReportTable_(dailySummary, 'daily');
       html += '</div>';
 
@@ -1614,6 +1630,7 @@
 
     function clearRedeemSummary() {
       document.getElementById('summaryUsername').value = '';
+      document.getElementById('summaryDate').value = '';
       document.getElementById('summaryResult').innerHTML = '';
       setDefaultSummaryMonth();
     }
@@ -1885,6 +1902,41 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+    }
+
+        function loadStockCheck() {
+      if (!currentUser || !currentUser.admin) {
+        showError('เฉพาะแอดมินเท่านั้นที่สามารถเช็คสต็อกได้');
+        return;
+      }
+      const box = document.getElementById('stockCheckResult');
+      const types = ['Duck 400', 'Duck 800'];
+      const counts = {};
+      box.innerHTML = '<div class="report-empty">กำลังเช็คสต็อก...</div>';
+      types.forEach(function(codeType) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            counts[codeType] = (res && res.ok) ? Number(res.remaining || 0) : null;
+            renderStockCheck(types, counts);
+          })
+          .withFailureHandler(function() {
+            counts[codeType] = null;
+            renderStockCheck(types, counts);
+          })
+          .getRemainingCodes({ auth: getAuthPayload(), codeType: codeType });
+      });
+    }
+
+    function renderStockCheck(types, counts) {
+      if (Object.keys(counts).length < types.length) return;
+      const box = document.getElementById('stockCheckResult');
+      box.innerHTML = '<div class="summary-cards">' + types.map(function(codeType) {
+        const n = counts[codeType];
+        const value = (n === null) ? 'error' : n;
+        return '<div class="summary-card">' +
+          '<div class="summary-card-label">🐥 ' + escapeHtml(normalizeDisplayCodeType(codeType)) + '</div>' +
+          '<div class="summary-card-value">' + escapeHtml(value) + '</div></div>';
+      }).join('') + '</div>';
     }
   </script>
 </body>
