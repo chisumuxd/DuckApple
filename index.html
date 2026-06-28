@@ -699,6 +699,67 @@
       line-height: 1.6;
     }
 
+        /* เมนูสลับหน้า (icon-only + hover โชว์ข้อความ) */
+    .menu-nav {
+      display: flex;
+      gap: 6px;
+      margin-top: 18px;
+      padding: 6px;
+      border-radius: 18px;
+      background: #fff7d1;
+      border: 1px solid #ffe08a;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .menu-nav::-webkit-scrollbar { display: none; }
+    .menu-nav .menu-btn {
+      width: auto;
+      margin-top: 0;
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 11px 14px;
+      border-radius: 13px;
+      font-size: 14px;
+      font-weight: 800;
+      white-space: nowrap;
+      background: transparent;
+      color: var(--duck-muted);
+      border: none;
+      box-shadow: none;
+      transition: 0.16s ease;
+    }
+    .menu-nav .menu-btn .menu-icon { font-size: 18px; line-height: 1; }
+    .menu-nav .menu-btn .menu-text {
+      max-width: 0;
+      opacity: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: max-width 0.22s ease, opacity 0.18s ease;
+    }
+    .menu-nav .menu-btn:hover {
+      transform: none;
+      color: var(--duck-brown);
+      background: rgba(255, 255, 255, 0.7);
+    }
+    .menu-nav .menu-btn:hover .menu-text,
+    .menu-nav .menu-btn.active .menu-text { max-width: 220px; opacity: 1; }
+    .menu-nav .menu-btn.active {
+      color: var(--duck-brown);
+      background: #ffffff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+    .admin-panel {
+      margin-top: 0;
+      padding: 0;
+      border: none;
+      background: none;
+      box-shadow: none;
+    }
+    .app-hidden { display: none !important; }
+    
     @media (max-width: 768px) {
       body {
         padding: 14px;
@@ -804,7 +865,7 @@
 
         <button class="logout-btn small-btn" onclick="logout()">ออกจากระบบ</button>
       </div>
-
+        <div id="menuNav" class="menu-nav"></div>
       <div id="redeemPanel" class="main-panel hidden">
         <h2>🐥 เบิกโค้ด Duck</h2>
 
@@ -1221,6 +1282,7 @@
 
       updateTypeOptionUI();
       refreshRemainingCodes();
+      buildMenuNav();
     }
 
     function normalizeDisplayCodeType(text) {
@@ -1904,7 +1966,59 @@
         .replace(/'/g, '&#039;');
     }
 
-        function loadStockCheck() {
+         function getMenuPages() {
+      const pages = [document.getElementById('redeemPanel')];
+      if (currentUser && currentUser.admin) {
+        document.querySelectorAll('#adminPanel .admin-section').forEach(function(sec) {
+          pages.push(sec);
+        });
+      }
+      return pages.filter(Boolean);
+    }
+
+    function buildMenuNav() {
+      const nav = document.getElementById('menuNav');
+      const pages = getMenuPages();
+      nav.innerHTML = '';
+      pages.forEach(function(page, i) {
+        if (!page.id) page.id = 'menuPage_' + i;
+        const h2 = page.querySelector('h2');
+        const label = h2 ? h2.textContent.trim() : ('เมนู ' + (i + 1));
+        const parts = label.split(/\s+/);
+        const icon = parts.length > 1 ? parts.shift() : '•';
+        const text = parts.join(' ') || label;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'menu-btn';
+        btn.title = text;
+        const iconEl = document.createElement('span');
+        iconEl.className = 'menu-icon';
+        iconEl.textContent = icon;
+        const textEl = document.createElement('span');
+        textEl.className = 'menu-text';
+        textEl.textContent = text;
+        btn.appendChild(iconEl);
+        btn.appendChild(textEl);
+        btn.onclick = function() { showMenuPage(page.id); };
+        nav.appendChild(btn);
+      });
+      if (pages.length) showMenuPage(pages[0].id);
+    }
+
+    function showMenuPage(id) {
+      const pages = getMenuPages();
+      pages.forEach(function(page) {
+        page.classList.toggle('app-hidden', page.id !== id);
+      });
+      const buttons = document.getElementById('menuNav').querySelectorAll('.menu-btn');
+      pages.forEach(function(page, i) {
+        if (buttons[i]) buttons[i].classList.toggle('active', page.id === id);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }  
+    
+    
+    function loadStockCheck() {
       if (!currentUser || !currentUser.admin) {
         showError('เฉพาะแอดมินเท่านั้นที่สามารถเช็คสต็อกได้');
         return;
