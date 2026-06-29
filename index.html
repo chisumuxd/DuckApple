@@ -894,6 +894,26 @@
         <div class="admin-section">
           <h2>📦 เติมโค้ดเข้าคลัง</h2>
 
+          <div class="admin-section">
+          <h2>🗄️ เช็คโค้ดในคลัง</h2>
+          <div class="report-empty" style="margin-top:4px;">
+            เลือกประเภทแล้วกดเช็ค จะเห็นจำนวนคงเหลือและเลขโค้ดทั้งหมดที่ยังไม่ถูกเบิก
+          </div>
+
+          <label>ประเภทโค้ด</label>
+          <select id="stockCheckType">
+            <option value="Cat4K 400">Cat4K 400</option>
+            <option value="Cat4K 800">Cat4K 800</option>
+          </select>
+
+          <div class="report-actions">
+            <button class="admin-btn" onclick="loadStockCheck()">🔄 เช็คสต็อก</button>
+            <button class="secondary-btn" onclick="clearStockCheck()">ล้าง</button>
+          </div>
+
+          <div id="stockCheckResult"></div>
+        </div>
+
           <label>ประเภทโค้ดที่ต้องการเติม</label>
           <select id="stockCodeType">
             <option value="Duck 400">Duck 400</option>
@@ -940,7 +960,7 @@
           </div>
 
           <div class="report-empty" style="margin-top:12px;">
-            สรุปรายวันจะแสดงเฉพาะวันที่ปัจจุบันเท่านั้น ส่วนสรุปรายเดือนจะแสดงตามเดือนที่เลือก
+            สรุปรายวันจะแสดงตามวันที่เลือก (เว้นว่าง = วันนี้) ส่วนสรุปรายเดือนจะแสดงตามเดือนที่เลือก
           </div>
 
           <div class="report-actions">
@@ -1051,6 +1071,7 @@
       getRedeemHistory: { fn: 'get_redeem_history',    args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token }) },
       getRedeemSummary: { fn: 'get_redeem_summary',    args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_target_username: p.targetUsername || '', p_month: p.month || '', p_date: p.date || '' }) },
       addStockCodes:    { fn: 'add_stock_codes',       args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_gift_type: p.codeType, p_raw_codes: p.rawCodes, p_note: p.note || '' }) },
+      getStockCodes:    { fn: 'get_stock_codes',       args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_code_type: p.codeType }) },
       getManagedUsers:  { fn: 'get_managed_users',     args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token }) },
       upsertManagedUser:{ fn: 'upsert_managed_user',   args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_managed_username: p.username, p_password: p.password || '', p_display_name: p.displayName || '', p_role: p.role || 'USER', p_status: p.status || 'ACTIVE', p_note: p.note || '' }) },
       setManagedUserStatus: { fn: 'set_managed_user_status', args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_managed_username: p.username, p_status: p.status }) }
@@ -1094,6 +1115,7 @@
     let latestCodes = [];
     let currentUser = null;
     let managedUsersCache = [];
+    let stockCheckCodes = [];
     let auth = null;
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -1629,7 +1651,7 @@
       html += '</div>';
 
       html += '<div class="report-section">';
-      html += '<div class="report-title">📅 สรุปรายวัน ' + escapeHtml(today || '') + '</div>';
+      html += '<div class="report-title">📅 สรุปรายวัน ' + escapeHtml(today || 'เฉพาะวันนี้') + '</div>';
       html += renderReportTable_(dailySummary, 'daily');
       html += '</div>';
 
@@ -1697,6 +1719,85 @@
       setDefaultSummaryMonth();
     }
 
+        function loadStockCheck() {
+      if (!currentUser || !currentUser.admin) {
+        showError('เฉพาะแอดมินเท่านั้นที่สามารถเช็คสต็อกได้');
+        return;
+      }
+
+      const codeType = document.getElementById('stockCheckType').value;
+      const box = document.getElementById('stockCheckResult');
+
+      box.innerHTML = '<div class="report-empty">กำลังเช็คสต็อก...</div>';
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (!res) {
+            box.innerHTML = '<div class="report-empty">ระบบไม่ส่งข้อมูลกลับมา</div>';
+            return;
+          }
+
+          if (!res.ok) {
+            box.innerHTML = '<div class="report-empty">' + escapeHtml(res.message || 'เช็คสต็อกไม่สำเร็จ') + '</div>';
+            return;
+          }
+
+          renderStockCheck(normalizeDisplayCodeType(res.codeType || codeType), res.codes || [], res.remaining);
+        })
+        .withFailureHandler(function(err) {
+          box.innerHTML = '<div class="report-empty">เกิดข้อผิดพลาด: ' + escapeHtml(err.message || err) + '</div>';
+        })
+        .getStockCodes({
+          auth: getAuthPayload(),
+          codeType: codeType
+        });
+    }
+
+    function renderStockCheck(label, codes, remaining) {
+      const box = document.getElementById('stockCheckResult');
+      stockCheckCodes = codes || [];
+      const count = (remaining === undefined || remaining === null) ? stockCheckCodes.length : remaining;
+
+      let html = '';
+      html += '<div class="summary-cards" style="grid-template-columns:1fr;">';
+      html += '<div class="summary-card"><div class="summary-card-label">🗄️ ' + escapeHtml(label) + ' คงเหลือ</div>';
+      html += '<div class="summary-card-value">' + escapeHtml(count) + '</div></div>';
+      html += '</div>';
+
+      if (!stockCheckCodes.length) {
+        html += '<div class="report-empty" style="margin-top:12px;">ไม่มีเลขโค้ดในคลัง (หรือฟังก์ชันหลังบ้าน get_stock_codes ยังไม่คืนรายการโค้ด)</div>';
+      } else {
+        html += '<div class="report-title" style="margin-top:14px;">🔑 เลขโค้ดทั้งหมด (' + stockCheckCodes.length + ')</div>';
+        html += '<div class="code-box">' + escapeHtml(stockCheckCodes.join('\n')) + '</div>';
+        html += '<button class="secondary-btn" onclick="copyStockCodes()">คัดลอกเลขโค้ดทั้งหมด</button>';
+      }
+
+      box.innerHTML = html;
+    }
+
+    function copyStockCodes() {
+      const text = (stockCheckCodes || []).join('\n');
+
+      if (!text) {
+        return;
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          showSuccess('คัดลอกเลขโค้ดทั้งหมดแล้ว');
+        }).catch(function() {
+          fallbackCopyText(text);
+        });
+      } else {
+        fallbackCopyText(text);
+      }
+    }
+
+    function clearStockCheck() {
+      stockCheckCodes = [];
+      document.getElementById('stockCheckResult').innerHTML = '';
+    }
+    
     function loadManagedUsers() {
       if (!currentUser || !currentUser.admin) {
         return;
