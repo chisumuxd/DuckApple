@@ -267,8 +267,8 @@
             🐤 Duck 400
           </label>
           <label class="type-option">
-            <input type="radio" name="giftType" value="800" onchange="onGiftTypeChange()">
-            🦆 Duck 800
+            <input type="radio" name="giftType" value="200" onchange="onGiftTypeChange()">
+            🐤 Duck 200
           </label>
         </div>
         <label>อีเมลหัวบ้าน</label>
@@ -284,7 +284,7 @@
           <label>ประเภทโค้ดที่ต้องการเติม</label>
           <select id="stockCodeType">
             <option value="Duck 400">Duck 400</option>
-            <option value="Duck 800">Duck 800</option>
+            <option value="Duck 200">Duck 200</option>
           </select>
           <label>วางโค้ดที่ต้องการเติม</label>
           <textarea id="stockCodes" placeholder="วางโค้ดได้หลายบรรทัด เช่น&#10;CODE111111111111&#10;CODE222222222222"></textarea>
@@ -302,7 +302,7 @@
           <label>ประเภทโค้ด</label>
           <select id="stockCheckType">
             <option value="Duck 400">Duck 400</option>
-            <option value="Duck 800">Duck 800</option>
+            <option value="Duck 200">Duck 200</option>
           </select>
           <div class="report-actions">
             <button class="admin-btn" onclick="loadStockCheck()">🔄 เช็คสต็อก</button>
@@ -372,7 +372,7 @@
     </div>
 
     <div id="result" class="result"></div>
-    <div class="note">🐥 Duck Gift Card 400 / 800</div>
+    <div class="note">🐥 Duck Gift Card 400 / 200</div>
   </div>
 
   <div id="modalOverlay" class="modal-overlay">
@@ -765,7 +765,7 @@
       let html = '';
       html += '<div class="summary-cards">';
       html += '<div class="summary-card"><div class="summary-card-label">🐤 Duck 400</div><div class="summary-card-value">' + escapeHtml(grandTotal.duck400) + '</div></div>';
-      html += '<div class="summary-card"><div class="summary-card-label">🦆 Duck 800</div><div class="summary-card-value">' + escapeHtml(grandTotal.duck800) + '</div></div>';
+      html += '<div class="summary-card"><div class="summary-card-label">🐤 Duck 200</div><div class="summary-card-value">' + escapeHtml(grandTotal.duck200) + '</div></div>';
       html += '<div class="summary-card"><div class="summary-card-label">📦 รวมเดือนนี้</div><div class="summary-card-value">' + escapeHtml(grandTotal.total) + '</div></div>';
       html += '</div>';
       html += '<div class="report-section">';
@@ -784,7 +784,7 @@
       const firstHeader = mode === 'monthly' ? 'เดือน' : 'วันที่';
       let html = '';
       html += '<div class="report-table-wrap"><table class="report-table"><thead><tr>';
-      html += '<th>' + firstHeader + '</th><th>ชื่อผู้เบิก</th><th>Duck 400</th><th>Duck 800</th><th>รวม</th>';
+      html += '<th>' + firstHeader + '</th><th>ชื่อผู้เบิก</th><th>Duck 400</th><th>Duck 200</th><th>รวม</th>';
       html += '</tr></thead><tbody>';
       items.forEach(function(item) {
         const firstValue = mode === 'monthly' ? item.displayMonth : item.displayDate;
@@ -792,7 +792,7 @@
         html += '<td>' + escapeHtml(firstValue || '') + '</td>';
         html += '<td class="email-cell">' + escapeHtml(item.displayName || item.username || '') + '</td>';
         html += '<td class="number">' + escapeHtml(item.duck400 || 0) + '</td>';
-        html += '<td class="number">' + escapeHtml(item.duck800 || 0) + '</td>';
+        html += '<td class="number">' + escapeHtml(item.duck200 || 0) + '</td>';
         html += '<td class="number">' + escapeHtml(item.total || 0) + '</td>';
         html += '</tr>';
       });
@@ -803,10 +803,10 @@
     function calculateGrandTotal_(items) {
       return items.reduce(function(sum, item) {
         sum.duck400 += Number(item.duck400 || 0);
-        sum.duck800 += Number(item.duck800 || 0);
+        sum.duck200 += Number(item.duck200 || 0);
         sum.total += Number(item.total || 0);
         return sum;
-      }, { duck400: 0, duck800: 0, total: 0 });
+      }, { duck400: 0, duck200: 0, total: 0 });
     }
 
     function clearRedeemSummary() {
