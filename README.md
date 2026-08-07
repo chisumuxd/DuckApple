@@ -1,0 +1,1 @@
+const GIFT_TYPES
