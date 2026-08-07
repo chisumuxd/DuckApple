@@ -261,20 +261,7 @@
       <div id="redeemPanel" class="main-panel hidden">
         <h2>🐥 เบิกโค้ด Duck</h2>
         <label>ประเภท Gift Card</label>
-        <div class="type-options">
-          <label class="type-option active">
-            <input type="radio" name="giftType" value="100" checked onchange="onGiftTypeChange()">
-            🐤 Duck 100
-          </label>
-          <label class="type-option">
-            <input type="radio" name="giftType" value="400" onchange="onGiftTypeChange()">
-            🐤 Duck 400
-          </label>
-          <label class="type-option">
-            <input type="radio" name="giftType" value="800" onchange="onGiftTypeChange()">
-            🐤 Duck 800
-          </label>
-        </div>
+        <div class="type-options"></div>
         <label>อีเมลหัวบ้าน</label>
         <input id="headEmail" type="email" placeholder="กรอกอีเมลหัวบ้าน">
         <button id="btn" onclick="submitForm()">🐥 เบิกโค้ด</button>
@@ -286,11 +273,7 @@
         <div class="admin-section">
           <h2>📦 เติมโค้ดเข้าคลัง</h2>
           <label>ประเภทโค้ดที่ต้องการเติม</label>
-          <select id="stockCodeType">
-            <option value="Duck 100">Duck 100</option>
-            <option value="Duck 400">Duck 400</option>
-            <option value="Duck 800">Duck 800</option>
-          </select>
+          <select id="stockCodeType"></select>
           <label>วางโค้ดที่ต้องการเติม</label>
           <textarea id="stockCodes" placeholder="วางโค้ดได้หลายบรรทัด เช่น&#10;CODE111111111111&#10;CODE222222222222"></textarea>
           <label>หมายเหตุ</label>
@@ -305,11 +288,7 @@
             เลือกประเภทแล้วกดเช็ค จะเห็นจำนวนคงเหลือและเลขโค้ดทั้งหมดที่ยังไม่ถูกเบิก
           </div>
           <label>ประเภทโค้ด</label>
-          <select id="stockCheckType">
-            <option value="Duck 100">Duck 100</option>
-            <option value="Duck 400">Duck 400</option>
-            <option value="Duck 800">Duck 800</option>
-          </select>
+          <select id="stockCheckType"></select>
           <div class="report-actions">
             <button class="admin-btn" onclick="loadStockCheck()">🔄 เช็คสต็อก</button>
             <button class="secondary-btn" onclick="clearStockCheck()">ล้าง</button>
@@ -378,7 +357,7 @@
     </div>
 
     <div id="result" class="result"></div>
-    <div class="note">🐥 Duck Gift Card 400 / 100</div>
+    <div class="note">🐥 Duck Gift Card</div>
   </div>
 
   <div id="modalOverlay" class="modal-overlay">
@@ -461,13 +440,30 @@
   <script>
     const SESSION_KEY = 'duck_gift_auth_v2';
 
+    // ponytail: แก้เลขประเภทตรงนี้ที่เดียว (ตัวแรก = ค่าเริ่มต้น)
+    // แล้วรัน DuckChangeType.sql ในโปรเจกต์ Supabase ให้หลังบ้านตรงกัน
+    const GIFT_TYPES = ['100', '400', '800'];
+
     let latestCodes = [];
     let currentUser = null;
     let managedUsersCache = [];
     let stockCheckCodes = [];
     let auth = null;
 
-    document.addEventListener('DOMContentLoaded', function() { restoreSession(); });
+    document.addEventListener('DOMContentLoaded', function() { buildGiftTypeUI(); restoreSession(); });
+
+    function buildGiftTypeUI() {
+      document.querySelector('.type-options').innerHTML = GIFT_TYPES.map(function(t, i) {
+        return '<label class="type-option' + (i === 0 ? ' active' : '') + '">' +
+          '<input type="radio" name="giftType" value="' + t + '"' + (i === 0 ? ' checked' : '') +
+          ' onchange="onGiftTypeChange()"> 🐤 Duck ' + t + '</label>';
+      }).join('');
+      ['stockCodeType', 'stockCheckType'].forEach(function(id) {
+        document.getElementById(id).innerHTML = GIFT_TYPES.map(function(t) {
+          return '<option value="Duck ' + t + '">Duck ' + t + '</option>';
+        }).join('');
+      });
+    }
 
     function handleLoginKey(event) { if (event.key === 'Enter') { login(); } }
 
@@ -590,7 +586,7 @@
 
     function getSelectedGiftType() {
       const checked = document.querySelector('input[name="giftType"]:checked');
-      return checked ? checked.value : '400';
+      return checked ? checked.value : GIFT_TYPES[0];
     }
 
     function getSelectedCodeType() { return 'Duck ' + getSelectedGiftType(); }
@@ -740,7 +736,7 @@
     }
 
     function clearStockForm() {
-      document.getElementById('stockCodeType').value = 'Duck 100';
+      document.getElementById('stockCodeType').value = 'Duck ' + GIFT_TYPES[0];
       document.getElementById('stockCodes').value = '';
       document.getElementById('stockNote').value = '';
     }
@@ -769,10 +765,10 @@
       const box = document.getElementById('summaryResult');
       const grandTotal = calculateGrandTotal_(monthlySummary);
       let html = '';
-      html += '<div class="summary-cards" style="grid-template-columns:repeat(4,1fr);">';
-      html += '<div class="summary-card"><div class="summary-card-label">🐤 Duck 100</div><div class="summary-card-value">' + escapeHtml(grandTotal.duck100) + '</div></div>';
-      html += '<div class="summary-card"><div class="summary-card-label">🐤 Duck 400</div><div class="summary-card-value">' + escapeHtml(grandTotal.duck400) + '</div></div>';
-      html += '<div class="summary-card"><div class="summary-card-label">🐤 Duck 800</div><div class="summary-card-value">' + escapeHtml(grandTotal.duck800) + '</div></div>';
+      html += '<div class="summary-cards" style="grid-template-columns:repeat(' + (GIFT_TYPES.length + 1) + ',1fr);">';
+      GIFT_TYPES.forEach(function(t) {
+        html += '<div class="summary-card"><div class="summary-card-label">🐤 Duck ' + t + '</div><div class="summary-card-value">' + escapeHtml(grandTotal['duck' + t]) + '</div></div>';
+      });
       html += '<div class="summary-card"><div class="summary-card-label">📦 รวมเดือนนี้</div><div class="summary-card-value">' + escapeHtml(grandTotal.total) + '</div></div>';
       html += '</div>';
       html += '<div class="report-section">';
@@ -791,16 +787,16 @@
       const firstHeader = mode === 'monthly' ? 'เดือน' : 'วันที่';
       let html = '';
       html += '<div class="report-table-wrap"><table class="report-table"><thead><tr>';
-      html += '<th>' + firstHeader + '</th><th>ชื่อผู้เบิก</th><th>Duck 100</th><th>Duck 400</th><th>Duck 800</th><th>รวม</th>';
+      html += '<th>' + firstHeader + '</th><th>ชื่อผู้เบิก</th>';
+      GIFT_TYPES.forEach(function(t) { html += '<th>Duck ' + t + '</th>'; });
+      html += '<th>รวม</th>';
       html += '</tr></thead><tbody>';
       items.forEach(function(item) {
         const firstValue = mode === 'monthly' ? item.displayMonth : item.displayDate;
         html += '<tr>';
         html += '<td>' + escapeHtml(firstValue || '') + '</td>';
         html += '<td class="email-cell">' + escapeHtml(item.displayName || item.username || '') + '</td>';
-        html += '<td class="number">' + escapeHtml(item.duck100 || 0) + '</td>';
-        html += '<td class="number">' + escapeHtml(item.duck400 || 0) + '</td>';
-        html += '<td class="number">' + escapeHtml(item.duck800 || 0) + '</td>';
+        GIFT_TYPES.forEach(function(t) { html += '<td class="number">' + escapeHtml(item['duck' + t] || 0) + '</td>'; });
         html += '<td class="number">' + escapeHtml(item.total || 0) + '</td>';
         html += '</tr>';
       });
@@ -809,13 +805,13 @@
     }
 
     function calculateGrandTotal_(items) {
-      return items.reduce(function(sum, item) {
-        sum.duck100 += Number(item.duck100 || 0);
-        sum.duck400 += Number(item.duck400 || 0);
-        sum.duck800 += Number(item.duck800 || 0);
+      const sum = { total: 0 };
+      GIFT_TYPES.forEach(function(t) { sum['duck' + t] = 0; });
+      items.forEach(function(item) {
+        GIFT_TYPES.forEach(function(t) { sum['duck' + t] += Number(item['duck' + t] || 0); });
         sum.total += Number(item.total || 0);
-        return sum;
-      }, { duck100: 0, duck400: 0, duck800: 0, total: 0 });
+      });
+      return sum;
     }
 
     function clearRedeemSummary() {
