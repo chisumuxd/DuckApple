@@ -283,6 +283,18 @@
         </div>
 
         <div class="admin-section">
+          <h2>🧾 ประวัติการเติมโค้ด</h2>
+          <div class="report-empty" style="margin-top:4px;">
+            ดูย้อนหลังว่าใครเติมโค้ดประเภทไหน เมื่อไหร่ จำนวนเท่าไหร่ และซ้ำ/ไม่ถูกต้องกี่รายการ
+          </div>
+          <div class="report-actions">
+            <button class="admin-btn" onclick="loadStockHistory()">🔄 โหลดประวัติการเติม</button>
+            <button class="secondary-btn" onclick="clearStockHistory()">ล้าง</button>
+          </div>
+          <div id="stockHistoryResult"></div>
+        </div>
+
+        <div class="admin-section">
           <h2>🗄️ เช็คโค้ดในคลัง</h2>
           <div class="report-empty" style="margin-top:4px;">
             เลือกประเภทแล้วกดเช็ค จะเห็นจำนวนคงเหลือและเลขโค้ดทั้งหมดที่ยังไม่ถูกเบิก
@@ -404,6 +416,7 @@
       getRedeemSummary: { fn: 'get_redeem_summary',    args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_target_username: p.targetUsername || '', p_month: p.month || '', p_date: p.date || '' }) },
       addStockCodes:    { fn: 'add_stock_codes',       args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_gift_type: p.codeType, p_raw_codes: p.rawCodes, p_note: p.note || '' }) },
       getStockCodes:    { fn: 'get_stock_codes',       args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_code_type: p.codeType }) },
+      getStockHistory:  { fn: 'get_stock_history',     args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_limit: p.limit || 200 }) },
       getManagedUsers:  { fn: 'get_managed_users',     args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token }) },
       upsertManagedUser:{ fn: 'upsert_managed_user',   args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_managed_username: p.username, p_password: p.password || '', p_display_name: p.displayName || '', p_role: p.role || 'USER', p_status: p.status || 'ACTIVE', p_note: p.note || '' }) },
       setManagedUserStatus: { fn: 'set_managed_user_status', args: p => ({ p_username: _auth(p).username, p_token: _auth(p).token, p_managed_username: p.username, p_status: p.status }) }
@@ -733,6 +746,58 @@
           showError('เกิดข้อผิดพลาด: ' + (err.message || err));
         })
         .addStockCodes({ auth: getAuthPayload(), codeType: codeType, rawCodes: rawCodes, note: note });
+    }
+
+    // ===== ประวัติการเติมโค้ด (อ่านจากตาราง stock_logs ที่ add_stock_codes บันทึกไว้อยู่แล้ว) =====
+    function loadStockHistory() {
+      if (!currentUser || !currentUser.admin) { showError('เฉพาะแอดมินเท่านั้นที่ดูประวัติการเติมโค้ดได้'); return; }
+      const box = document.getElementById('stockHistoryResult');
+      box.innerHTML = '<div class="report-empty">กำลังโหลดประวัติ...</div>';
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (!res) { box.innerHTML = '<div class="report-empty">ระบบไม่ส่งข้อมูลกลับมา</div>'; return; }
+          if (!res.ok) { box.innerHTML = '<div class="report-empty">' + escapeHtml(res.message || 'โหลดประวัติไม่สำเร็จ') + '</div>'; return; }
+          renderStockHistory(res.rows || []);
+        })
+        .withFailureHandler(function(err) {
+          box.innerHTML = '<div class="report-empty">เกิดข้อผิดพลาด: ' + escapeHtml(err.message || err) + '</div>';
+        })
+        .getStockHistory({ auth: getAuthPayload(), limit: 200 });
+    }
+
+    function clearStockHistory() { document.getElementById('stockHistoryResult').innerHTML = ''; }
+
+    function formatStockTime_(row) {
+      const raw = row.created_at || row.logged_at || row.ts || row.inserted_at || '';
+      if (!raw) { return '-'; }
+      const d = new Date(raw);
+      if (isNaN(d)) { return String(raw); }
+      const p = function(n) { return String(n).padStart(2, '0'); };
+      return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() +
+        ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+    }
+
+    function renderStockHistory(rows) {
+      const box = document.getElementById('stockHistoryResult');
+      if (!rows.length) { box.innerHTML = '<div class="report-empty">ยังไม่มีประวัติการเติมโค้ด</div>'; return; }
+      const total = rows.reduce(function(s, r) { return s + Number(r.added || 0); }, 0);
+      let html = '<div class="report-empty" style="margin-top:12px;">พบ ' + rows.length + ' ครั้ง รวมเติมทั้งหมด ' + total + ' โค้ด</div>';
+      html += '<div class="report-table-wrap" style="margin-top:10px;"><table class="report-table">' +
+        '<thead><tr><th>วันเวลา</th><th>ผู้เติม</th><th>ประเภท</th><th>เพิ่มใหม่</th>' +
+        '<th>ซ้ำในข้อความ</th><th>ซ้ำกับระบบ</th><th>ไม่ถูกต้อง</th><th>หมายเหตุ</th></tr></thead><tbody>';
+      rows.forEach(function(r) {
+        html += '<tr>' +
+          '<td>' + escapeHtml(formatStockTime_(r)) + '</td>' +
+          '<td class="email-cell">' + escapeHtml(r.username || '-') + '</td>' +
+          '<td>' + escapeHtml('Duck ' + (r.gift_type || '-')) + '</td>' +
+          '<td class="number">' + escapeHtml(r.added || 0) + '</td>' +
+          '<td class="number">' + escapeHtml(r.duplicate_in_input || 0) + '</td>' +
+          '<td class="number">' + escapeHtml(r.duplicate_in_system || 0) + '</td>' +
+          '<td class="number">' + escapeHtml(r.invalid || 0) + '</td>' +
+          '<td class="email-cell">' + escapeHtml(r.note || '-') + '</td>' +
+          '</tr>';
+      });
+      box.innerHTML = html + '</tbody></table></div>';
     }
 
     function clearStockForm() {
